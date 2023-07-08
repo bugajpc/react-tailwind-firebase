@@ -1,7 +1,13 @@
 import React from "react";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import OAuth from "../components/OAuth";
+import { db } from "../firebase";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore"; 
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
 export default function SignUp() {
   const [showPassword, setShowPassword] = React.useState(false);
   const [formData, setFormData] = React.useState({
@@ -10,8 +16,32 @@ export default function SignUp() {
     password: "",
   });
   const { name, email, password } = formData;
+  const navigate = useNavigate();
   function onChange(e) {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  }
+  async function onSubmit(e) {
+    e.preventDefault();
+
+    try {
+      const auth = getAuth();
+      const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+      updateProfile(auth.currentUser, {
+        displayName: name,
+      });
+      const user = userCredentials.user;
+      const formDataCopy = { ...formData };
+      delete formDataCopy.password;
+      formDataCopy.timestamp = serverTimestamp();
+
+      await setDoc(doc(db, "users", user.uid), formDataCopy);
+      console.log(user);
+      toast.success("Account created successfully!");
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong!");
+    }
   }
   return (
     <section>
@@ -25,7 +55,7 @@ export default function SignUp() {
           />
         </div>
         <div>
-          <form>
+          <form onSubmit={onSubmit}>
             <input
               type="text"
               placeholder="Full name"
@@ -77,7 +107,7 @@ export default function SignUp() {
 
             <input
               type="submit"
-              value="Sign In"
+              value="Sign Up"
               className="block w-96 bg-blue-500 active:bg-blue-800 shadow-md hover:shadow-lg transition duration-150 hover:bg-blue-600 text-white p-2 mt-4 rounded-md cursor-pointer"
             />
             <div className="my-3 before:border-t after:border-t flex after:border-gray-300 after:flex-1 before:flex-1 items-center before:border-gray-300">
