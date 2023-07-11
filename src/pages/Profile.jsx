@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { db } from "../firebase";
+import { FcHome } from "react-icons/fc";
+import { Link } from "react-router-dom";
 
 export default function Profile() {
   const auth = getAuth();
@@ -26,19 +28,18 @@ export default function Profile() {
   }
   async function onSubmit() {
     try {
-      if(auth.currentUser.displayName !== name)
-      {
+      if (auth.currentUser.displayName !== name) {
         await updateProfile(auth.currentUser, {
           displayName: name,
-        })
-        const docRef = doc(db, "users", auth.currentUser.uid)
+        });
+        const docRef = doc(db, "users", auth.currentUser.uid);
         await updateDoc(docRef, {
           name: name,
-        })
-        toast.success("Profile details updated")
+        });
+        toast.success("Profile details updated");
       }
     } catch (error) {
-      toast.error("Could not update profile details")
+      toast.error("Could not update profile details");
     }
   }
   return (
@@ -54,7 +55,9 @@ export default function Profile() {
               value={name}
               disabled={!changeDetail}
               onChange={onChange}
-              className={`w-full px-4 mb-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out ${changeDetail && "bg-red-200 focus:bg-red-200"}`}
+              className={`w-full px-4 mb-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out ${
+                changeDetail && "bg-red-200 focus:bg-red-200"
+              }`}
             />
             {/* Email Input */}
             <input
@@ -85,6 +88,15 @@ export default function Profile() {
               </p>
             </div>
           </form>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white uppercase px-7 py-3 text-sm font-medium active:bg-blue-800 hover:shadow-lg rounded shadow-md transition ease-in-out duration-150 hover:bg-blue-700"
+          >
+            <Link to="/create-listing" className="flex justify-center items-center gap-4">
+              <FcHome className="text-3xl bg-red-100 border-2 rounded p-1"/>
+              Sell or rent your home
+            </Link>
+          </button>
         </div>
       </section>
     </>
